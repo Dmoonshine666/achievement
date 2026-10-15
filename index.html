@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日成就笔记 · 多主题切换</title>
+    <style>
+        /* ========== 基础重置与通用样式 ========== */
+        * {
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            bottom: 40px;
+            right: 300px;
+            width: 100%;
+            height: 313px;
+            background-image: url(https://s41.ax1x.com/2026/04/22/peRZSW4.png);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: right bottom;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body.theme-orange::after {
+            background-image: url(https://s41.ax1x.com/2026/04/22/peRkUqf.png);
+        }
+        body.theme-green::after {
+            background-image: url(https://s41.ax1x.com/2026/05/14/pejurOe.png);
+        }
+        body.theme-pink::after {
+            background-image: url(https://s41.ax1x.com/2026/05/14/pejuBQO.png);
+        }
+        body.theme-purple::after {
+            background-image: url(https://s41.ax1x.com/2026/05/14/pejuDyD.png);
+        }
+
+        /* ========== 默认蓝色主题变量 ========== */
+        body {
+            --bg-color: #eaf3fb;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --sub-text: #5577aa;
+            --border-color: #88aadd;
+            --btn-bg: #5577aa;
+            --btn-hover: #446699;
+            --input-placeholder: #aaa;
+            --line-color: #eee;
+            --dot-color: #88aadd;
+            --highlight-bg: rgba(85, 119, 170, 0.15);
+        }
+
+        body.theme-green {
+            --bg-color: #f0f7f0;
+            --card-bg: #ffffff;
+            --text-color: #2d3e2d;
+            --sub-text: #4a7c59;
+            --border-color: #6b9e7a;
+            --btn-bg: #4a7c59;
+            --btn-hover: #3b6547;
+            --input-placeholder: #9fb7a9;
+            --line-color: #e2f0e5;
+            --dot-color: #6b9e7a;
+            --highlight-bg: rgba(74, 124, 89, 0.15);
+        }
+
+        body.theme-orange {
+            --bg-color: #fdf6f0;
+            --card-bg: #ffffff;
+            --text-color: #4e3e2e;
+            --sub-text: #c07a4b;
+            --border-color: #d49b6a;
+            --btn-bg: #c07a4b;
+            --btn-hover: #a5663c;
+            --input-placeholder: #c9b6a5;
+            --line-color: #f5e8dd;
+            --dot-color: #d49b6a;
+            --highlight-bg: rgba(192, 122, 75, 0.15);
+        }
+
+        body.theme-pink {
+            --bg-color: #fdf4f7;
+            --card-bg: #ffffff;
+            --text-color: #5e3a4c;
+            --sub-text: #c76b8b;
+            --border-color: #e09eb3;
+            --btn-bg: #c76b8b;
+            --btn-hover: #a85371;
+            --input-placeholder: #d6b7c2;
+            --line-color: #fbe9ef;
+            --dot-color: #e09eb3;
+            --highlight-bg: rgba(199, 107, 139, 0.15);
+        }
+
+        body.theme-purple {
+            --bg-color: #f7f5fc;
+            --card-bg: #ffffff;
+            --text-color: #3e3a5e;
+            --sub-text: #7a6aa4;
+            --border-color: #9b8bc0;
+            --btn-bg: #7a6aa4;
+            --btn-hover: #62528b;
+            --input-placeholder: #beb6d6;
+            --line-color: #ebe7f5;
+            --dot-color: #9b8bc0;
+            --highlight-bg: rgba(122, 106, 164, 0.15);
+        }
+
+        /* ========== 界面组件样式 ========== */
+        #moodInput {
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            padding: 0 12px;
+            padding-top: 44px;
+            font-size: 18px;
+            line-height: 24px;
+            color: var(--text-color);
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .notebook {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 900px;
+            min-height: 256px;
+            height: auto;
+            border: 1px solid var(--line-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: visible;
+            z-index: 1;
+        }
+
+        .header-row {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-cell {
+            padding: 14px;
+            border-right: 1px solid var(--border-color);
+            font-size: 18px;
+            color: var(--sub-text);
+            font-weight: 500;
+            line-height: 24px;
+            text-align: center;
+        }
+
+        .header-cell:last-child {
+            border-right: none;
+        }
+
+        .header-mood { width: 10.1%; }
+        .header-ach1  { width: 45%; }
+        .header-ach2 { width: 44%; }
+
+        .content-area {
+            display: flex;
+            height: auto;
+            min-height: 200px;
+        }
+
+        .column {
+            height: auto;
+            min-height: 100%;
+            position: relative;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: 0 0;
+        }
+
+        .column-mood { width: 18%; border-right: 1px solid var(--border-color); }
+        .column-ach1  { width: 80%; border-right: 1px solid var(--border-color); }
+        .column-ach2 { width: 80%; }
+
+        .note-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            padding: 0 12px 20px;
+            padding-top: 18px;
+            font-size: 18px;
+            line-height: 24px;
+            color: var(--text-color);
+            background: transparent;
+            overflow: hidden;
+        }
+        .note-input::placeholder { color: var(--input-placeholder); }
+
+        .footer-brand {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: var(--sub-text);
+            font-weight: 500;
+        }
+
+        .tool-bar {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .tool-btn {
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        .tool-btn:hover { background-color: var(--btn-hover); }
+        .btn-danger { background-color: #c75151; }
+        .btn-danger:hover { background-color: #a84040; }
+
+        .date-display {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            color: var(--sub-text);
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2;
+        }
+        .date-nav { display: flex; gap: 6px; }
+        .date-nav button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--sub-text);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .date-nav button:hover {
+            background: var(--btn-bg);
+            color: #fff;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .modal {
+            background: var(--card-bg);
+            color: var(--text-color);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        .modal h3 { margin-top: 0; color: var(--sub-text); }
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 16px 0;
+        }
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--line-color);
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .history-item:hover { background: rgba(136,170,221,0.1); }
+        .history-item.selected {
+            background: var(--highlight-bg);
+            border-left: 4px solid var(--btn-bg);
+        }
+        .history-date {
+            font-weight: 500;
+            color: var(--sub-text);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .history-row {
+            font-size: 14px;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .close-btn, .mini-btn {
+            background: var(--line-color);
+            color: var(--text-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .modal-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .top-extra {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 2;
+        }
+
+        /* ========== 主题切换器 ========== */
+        .theme-switcher {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 5px;
+        }
+        .theme-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .theme-dot:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .theme-dot.active {
+            border-width: 3px;
+            border-color: var(--text-color);
+            transform: scale(1.1);
+        }
+        .theme-dot.blue { background: #5577aa; }
+        .theme-dot.green { background: #4a7c59; }
+        .theme-dot.orange { background: #c07a4b; }
+        .theme-dot.pink { background: #c76b8b; }
+        .theme-dot.purple { background: #7a6aa4; }
+
+        /* PDF尺寸自定义面板 */
+        .pdf-size-panel {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+            color: var(--text-color);
+        }
+        .pdf-size-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--sub-text);
+            margin-bottom: 5px;
+        }
+        .size-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .size-input-group label { width: 40px; font-size: 14px; }
+        .size-input-group input {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            text-align: right;
+        }
+        .size-input-group span { font-size: 14px; color: var(--sub-text); }
+        .preset-sizes {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .preset-btn {
+            background: var(--line-color);
+            color: var(--text-color);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .preset-btn:hover {
+            background: var(--btn-bg);
+            color: white;
+        }
+    </style>
+    <!-- 依赖库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="date-display">
+        <div id="currentDateText"></div>
+        <div class="date-nav">
+            <button id="prevDay">←</button>
+            <button id="nextDay">→</button>
+        </div>
+    </div>
+
+    <div class="top-extra">
+        <button class="tool-btn mini-btn" id="clearToday">清空当日</button>
+        <div class="theme-switcher" id="themeSwitcher">
+            <div class="theme-dot blue active" data-theme="default"></div>
+            <div class="theme-dot green" data-theme="theme-green"></div>
+            <div class="theme-dot orange" data-theme="theme-orange"></div>
+            <div class="theme-dot pink" data-theme="theme-pink"></div>
+            <div class="theme-dot purple" data-theme="theme-purple"></div>
+        </div>
+    </div>
+
+    <div class="pdf-size-panel">
+        <div class="pdf-size-title">📄 PDF 页面尺寸 (毫米)</div>
+        <div class="size-input-group">
+            <label>宽度</label>
+            <input type="number" id="pdfWidthInput" value="240" min="50" max="500" step="1">
+            <span>mm</span>
+        </div>
+        <div class="size-input-group">
+            <label>高度</label>
+            <input type="number" id="pdfHeightInput" value="69" min="50" max="800" step="1">
+            <span>mm</span>
+        </div>
+        <div class="preset-sizes">
+            <button class="preset-btn" data-width="210" data-height="297">A4</button>
+            <button class="preset-btn" data-width="148" data-height="210">A5</button>
+            <button class="preset-btn" data-width="240" data-height="182">长条</button>
+            <button class="preset-btn" data-width="240" data-height="69">宽幅</button>
+        </div>
+    </div>
+
+    <div class="notebook">
+        <div class="header-row">
+            <div class="header-cell header-mood">心情</div>
+            <div class="header-cell header-ach1">成就一</div>
+            <div class="header-cell header-ach2">成就二</div>
+        </div>
+        <div class="content-area">
+            <div class="column column-mood">
+                <textarea class="note-input" id="moodInput" rows="1"></textarea>
+            </div>
+            <div class="column column-ach1">
+                <textarea class="note-input" id="titleInput" placeholder="写下今日第一件成就..." rows="1"></textarea>
+            </div>
+            <div class="column column-ach2">
+                <textarea class="note-input" id="answerInput" placeholder="写下今日第二件成就..." rows="1"></textarea>
+            </div>
+        </div>
+        <div class="footer-brand">KOKUYO</div>
+    </div>
+
+    <div class="tool-bar">
+        <button class="tool-btn" id="saveBtn">保存笔记</button>
+        <button class="tool-btn" id="exportPdfBtn">导出当日PDF</button>
+        <button class="tool-btn" id="exportAllBtn">批量导出全部PDF</button>
+        <button class="tool-btn" id="historyBtn">历史笔记管理</button>
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <h3>📋 历史笔记管理</h3>
+            <div class="history-list" id="historyList"></div>
+            <div class="modal-btn-group">
+                <button class="close-btn" id="closeHistory">关闭</button>
+                <button class="tool-btn" id="deleteSelectedBtn" style="background-color: #e68a2e;">清除选中</button>
+                <button class="tool-btn btn-danger" id="clearAllHistory">清空全部笔记</button>
+            </div>
+            <p style="font-size:12px; color: var(--sub-text); margin-top:8px;">💡 单击选中，双击打开笔记；选中后可按 Delete 键删除</p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            "use strict";
+
+            // ========== 主题管理 ==========
+            const themeSwitcher = document.getElementById('themeSwitcher');
+            const themeDots = document.querySelectorAll('.theme-dot');
+
+            function initTheme() {
+                const savedTheme = localStorage.getItem('noteTheme') || 'default';
+                applyTheme(savedTheme);
+            }
+
+            function applyTheme(themeName) {
+                document.body.classList.remove('theme-green', 'theme-orange', 'theme-pink', 'theme-purple');
+                if (themeName !== 'default') {
+                    document.body.classList.add(themeName);
+                }
+                themeDots.forEach(dot => {
+                    const dotTheme = dot.dataset.theme;
+                    if ((dotTheme === 'default' && themeName === 'default') || dotTheme === themeName) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+                localStorage.setItem('noteTheme', themeName);
+            }
+
+            themeDots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const theme = dot.dataset.theme;
+                    applyTheme(theme);
+                });
+            });
+
+            initTheme();
+
+            // ========== 全局变量 ==========
+            let currentViewDate = new Date();
+            const moodInput = document.getElementById('moodInput');
+            const titleInput = document.getElementById('titleInput');
+            const answerInput = document.getElementById('answerInput');
+            const pdfWidthInput = document.getElementById('pdfWidthInput');
+            const pdfHeightInput = document.getElementById('pdfHeightInput');
+
+            function autoResizeTextarea(textarea) {
+                if (!textarea) return;
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+            const allTextareas = [moodInput, titleInput, answerInput];
+            allTextareas.forEach(ta => {
+                ta.addEventListener('input', () => autoResizeTextarea(ta));
+            });
+            function adjustAllTextareasHeight() {
+                allTextareas.forEach(ta => autoResizeTextarea(ta));
+            }
+
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const w = btn.dataset.width;
+                    const h = btn.dataset.height;
+                    if (w) pdfWidthInput.value = w;
+                    if (h) pdfHeightInput.value = h;
+                });
+            });
+
+            function formatDate(date) {
+                return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            }
+            function getStorageKey(dateStr) {
+                return `dailyNote_${dateStr}`;
+            }
+            function getShortText(str, len = 12) {
+                if (!str) return '无内容';
+                return str.length > len ? str.slice(0, len) + '…' : str;
+            }
+
+            // ========== 日期切换 ==========
+            function updateDateDisplay() {
+                document.getElementById('currentDateText').textContent = formatDate(currentViewDate);
+                loadNoteByDate(currentViewDate);
+            }
+            document.getElementById('prevDay').addEventListener('click', () => {
+                currentViewDate.setDate(currentViewDate.getDate() - 1);
+                updateDateDisplay();
+            });
+            document.getElementById('nextDay').addEventListener('click', () => {
+                currentViewDate.setDate(currentViewDate.getDate() + 1);
+                updateDateDisplay();
+            });
+
+            // ========== 笔记读写 ==========
+            function loadNoteByDate(date) {
+                const dateStr = formatDate(date);
+                const saved = localStorage.getItem(getStorageKey(dateStr));
+                if (saved) {
+                    const note = JSON.parse(saved);
+                    moodInput.value = note.mood || '';
+                    titleInput.value = note.ach1 || '';
+                    answerInput.value = note.ach2 || '';
+                } else {
+                    moodInput.value = '';
+                    titleInput.value = '';
+                    answerInput.value = '';
+                }
+                adjustAllTextareasHeight();
+            }
+
+            function saveNote() {
+                const dateStr = formatDate(currentViewDate);
+                const note = {
+                    mood: moodInput.value,
+                    ach1: titleInput.value,
+                    ach2: answerInput.value,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(getStorageKey(dateStr), JSON.stringify(note));
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.textContent = '已保存 ✓';
+                setTimeout(() => saveBtn.textContent = '保存笔记', 1500);
+            }
+
+            let autoSaveTimeout;
+            allTextareas.forEach(input => {
+                input.addEventListener('input', () => {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(saveNote, 1000);
+                });
+            });
+            document.getElementById('saveBtn').addEventListener('click', saveNote);
+
+            document.getElementById('clearToday').addEventListener('click', () => {
+                if (confirm('确定清空今日所有内容？不可恢复')) {
+                    moodInput.value = '';
+                    titleInput.value = '';
+                    answerInput.value = '';
+                    adjustAllTextareasHeight();
+                    saveNote();
+                }
+            });
+
+            // ========== 历史笔记管理 ==========
+            const historyModal = document.getElementById('historyModal');
+            const historyList = document.getElementById('historyList');
+            let currentSelectedKey = null;
+
+            function clearSelectedStyle() {
+                document.querySelectorAll('.history-item').forEach(el => el.classList.remove('selected'));
+            }
+
+            function renderHistoryList() {
+                historyList.innerHTML = '';
+                const keys = Object.keys(localStorage).filter(k => k.startsWith('dailyNote_')).sort().reverse();
+                if (keys.length === 0) {
+                    historyList.innerHTML = '<div style="padding:12px;color:#999;">暂无历史笔记</div>';
+                    currentSelectedKey = null;
+                    return;
+                }
+
+                keys.forEach(key => {
+                    const dateStr = key.replace('dailyNote_', '');
+                    const note = JSON.parse(localStorage.getItem(key));
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.dataset.key = key;
+
+                    const a1 = getShortText(note.ach1, 12);
+                    const a2 = getShortText(note.ach2, 12);
+
+                    item.innerHTML = `
+                        <div class="history-date">${dateStr}</div>
+                        <div class="history-row">${a1} | ${a2}</div>
+                    `;
+
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        clearSelectedStyle();
+                        item.classList.add('selected');
+                        currentSelectedKey = key;
+                    });
+
+                    item.addEventListener('dblclick', () => {
+                        const [y, md] = dateStr.split('年');
+                        const [m, d] = md.replace('日', '').split('月');
+                        currentViewDate = new Date(+y, +m - 1, +d);
+                        updateDateDisplay();
+                        historyModal.style.display = 'none';
+                        clearSelectedStyle();
+                        currentSelectedKey = null;
+                    });
+
+                    historyList.appendChild(item);
+                });
+
+                if (!currentSelectedKey) {
+                    clearSelectedStyle();
+                } else {
+                    const prevSelected = document.querySelector(`.history-item[data-key="${currentSelectedKey}"]`);
+                    if (prevSelected) prevSelected.classList.add('selected');
+                    else currentSelectedKey = null;
+                }
+            }
+
+            function deleteSelectedNote() {
+                if (!currentSelectedKey) {
+                    alert('请先单击选中一条笔记');
+                    return;
+                }
+                if (!confirm('确定删除选中的笔记吗？')) return;
+                localStorage.removeItem(currentSelectedKey);
+                currentSelectedKey = null;
+                renderHistoryList();
+                const currentDateStr = formatDate(currentViewDate);
+                if (getStorageKey(currentDateStr) === currentSelectedKey) {
+                    loadNoteByDate(currentViewDate);
+                }
+            }
+
+            function showHistory() {
+                renderHistoryList();
+                historyModal.style.display = 'flex';
+            }
+
+            document.getElementById('historyBtn').addEventListener('click', showHistory);
+            document.getElementById('closeHistory').addEventListener('click', () => {
+                historyModal.style.display = 'none';
+                clearSelectedStyle();
+                currentSelectedKey = null;
+            });
+            document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedNote);
+
+            document.addEventListener('keydown', (e) => {
+                if (historyModal.style.display === 'flex' && e.key === 'Delete' && currentSelectedKey) {
+                    e.preventDefault();
+                    deleteSelectedNote();
+                }
+            });
+
+            document.getElementById('clearAllHistory').addEventListener('click', () => {
+                if (confirm('⚠️ 确定清空所有笔记，无法恢复！')) {
+                    const keys = Object.keys(localStorage).filter(k => k.startsWith('dailyNote_'));
+                    keys.forEach(k => localStorage.removeItem(k));
+                    renderHistoryList();
+                    loadNoteByDate(currentViewDate);
+                }
+            });
+
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) {
+                    historyModal.style.display = 'none';
+                    clearSelectedStyle();
+                    currentSelectedKey = null;
+                }
+            });
+
+            // ========== PDF 导出（单日） ==========
+            async function captureNotebookWithFullContent(notebookElement) {
+                const textareas = notebookElement.querySelectorAll('textarea');
+                const replacements = [];
+
+                textareas.forEach((ta) => {
+                    const div = document.createElement('div');
+                    div.className = ta.className;
+                    const computedStyle = window.getComputedStyle(ta);
+                    div.style.cssText = `
+                        width: 100%;
+                        height: auto;
+                        min-height: 100%;
+                        border: none;
+                        outline: none;
+                        padding: ${computedStyle.padding};
+                        font-size: ${computedStyle.fontSize};
+                        line-height: ${computedStyle.lineHeight};
+                        color: ${computedStyle.color};
+                        background: transparent;
+                        white-space: pre-wrap;
+                        word-break: break-word;
+                        overflow: visible;
+                        box-sizing: border-box;
+                        font-family: ${computedStyle.fontFamily};
+                    `;
+                    div.textContent = ta.value;
+
+                    ta.parentNode.replaceChild(div, ta);
+                    replacements.push({ original: ta, replacement: div });
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 30));
+
+                const canvas = await html2canvas(notebookElement, {
+                    scale: 2.5,
+                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--card-bg').trim() || '#ffffff',
+                    logging: false,
+                    allowTaint: false,
+                    useCORS: true
+                });
+
+                replacements.forEach(({ original, replacement }) => {
+                    replacement.parentNode.replaceChild(original, replacement);
+                });
+
+                return canvas;
+            }
+
+            async function exportSinglePdf() {
+                const notebook = document.querySelector('.notebook');
+                if (!notebook) return alert('未找到笔记区域');
+
+                const exportBtn = document.getElementById('exportPdfBtn');
+                const originalText = exportBtn.textContent;
+                exportBtn.textContent = '生成中...';
+                exportBtn.disabled = true;
+
+                try {
+                    const pdfWidthMm = parseFloat(pdfWidthInput.value) || 210;
+                    const pdfHeightMm = parseFloat(pdfHeightInput.value) || 297;
+
+                    const canvas = await captureNotebookWithFullContent(notebook);
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+
+                    const pdf = new jsPDF({
+                        orientation: pdfWidthMm >= pdfHeightMm ? 'landscape' : 'portrait',
+                        unit: 'mm',
+                        format: [pdfWidthMm, pdfHeightMm]
+                    });
+
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    let pageIndex = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+
+                    while (heightLeft > 0) {
+                        position = -(pdfHeight * (pageIndex + 1));
+                        pdf.addPage([pdfWidthMm, pdfHeightMm]);
+                        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                        heightLeft -= pdfHeight;
+                        pageIndex++;
+                    }
+
+                    const dateStr = formatDate(currentViewDate);
+                    pdf.save(`成就笔记_${dateStr}.pdf`);
+                } catch (error) {
+                    console.error(error);
+                    alert('导出失败，请重试。');
+                } finally {
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                }
+            }
+
+            // ========== 批量导出全部PDF（宽度240mm，高度自适应，文字底部自然留白） ==========
+            async function exportAllNote() {
+                const keys = Object.keys(localStorage).filter(k => k.startsWith('dailyNote_')).sort().reverse();
+                if (keys.length === 0) return alert('暂无笔记可导出');
+
+                const exportAllBtn = document.getElementById('exportAllBtn');
+                const originalText = exportAllBtn.textContent;
+                exportAllBtn.textContent = '生成中...';
+                exportAllBtn.disabled = true;
+
+                try {
+                    const PAGE_WIDTH_MM = 240;
+
+                    // 获取当前主题的字体，确保与当日导出一致
+                    const bodyFont = getComputedStyle(document.body).fontFamily;
+
+                    const container = document.createElement('div');
+                    container.style.position = 'absolute';
+                    container.style.left = '-9999px';
+                    container.style.top = '0';
+                    container.style.width = '900px';
+                    container.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--card-bg').trim();
+                    container.style.padding = '20px 0';
+
+                    const styles = getComputedStyle(document.body);
+                    const borderColor = styles.getPropertyValue('--border-color').trim();
+                    const subTextColor = styles.getPropertyValue('--sub-text').trim();
+                    const textColor = styles.getPropertyValue('--text-color').trim();
+                    const dotColor = styles.getPropertyValue('--dot-color').trim();
+
+                    keys.forEach(key => {
+                        const dateStr = key.replace('dailyNote_', '');
+                        const note = JSON.parse(localStorage.getItem(key));
+
+                        const card = document.createElement('div');
+                        card.className = 'notebook';
+                        // 固定宽度 900px，保证截图一致
+                        card.style.cssText = `
+                            width: 900px;
+                            margin-bottom: 30px;
+                            border: 1px solid ${borderColor};
+                            background-color: ${styles.getPropertyValue('--card-bg')};
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                            position: relative;
+                            overflow: visible;
+                            height: auto;
+                            min-height: 0;
+                            font-family: ${bodyFont};
+                        `;
+
+                        const headerRow = document.createElement('div');
+                        headerRow.className = 'header-row';
+                        headerRow.style.cssText = `display: flex; border-bottom: 1px solid ${borderColor};`;
+                        ['心情', '成就一', '成就二'].forEach((title, idx) => {
+                            const cell = document.createElement('div');
+                            cell.className = 'header-cell';
+                            const widths = ['10.1%', '45%', '44%'];
+                            cell.style.cssText = `
+                                padding: 14px;
+                                border-right: ${idx < 2 ? `1px solid ${borderColor}` : 'none'};
+                                font-size: 18px;
+                                color: ${subTextColor};
+                                font-weight: 500;
+                                line-height: 24px;
+                                text-align: center;
+                                width: ${widths[idx]};
+                                font-family: ${bodyFont};
+                            `;
+                            cell.textContent = title;
+                            headerRow.appendChild(cell);
+                        });
+
+                        const contentArea = document.createElement('div');
+                        contentArea.className = 'content-area';
+                        // 取消最小高度，让内容完全决定高度
+                        contentArea.style.cssText = `display: flex; height: auto; min-height: 0;`;
+
+                        const moodDiv = document.createElement('div');
+                        moodDiv.className = 'column column-mood';
+                        moodDiv.style.cssText = `
+                            width: 10.1%;
+                            border-right: 1px solid ${borderColor};
+                            padding: 0 12px;
+                            padding-top: 22px;
+                            padding-bottom: 20px;
+                            font-size: 18px;
+                            line-height: 24px;
+                            color: ${textColor};
+                            white-space: pre-wrap;
+                            word-break: break-word;
+                            background-image: radial-gradient(${dotColor} 1px, transparent 1px);
+                            background-size: 24px 24px;
+                            font-family: ${bodyFont};
+                        `;
+                        moodDiv.textContent = note.mood || '';
+
+                        const ach1Div = document.createElement('div');
+                        ach1Div.className = 'column column-ach1';
+                        ach1Div.style.cssText = `
+                            width: 45%;
+                            border-right: 1px solid ${borderColor};
+                            padding: 0 12px;
+                            padding-top: 22px;
+                            padding-bottom: 20px;
+                            font-size: 18px;
+                            line-height: 24px;
+                            color: ${textColor};
+                            white-space: pre-wrap;
+                            word-break: break-word;
+                            background-image: radial-gradient(${dotColor} 1px, transparent 1px);
+                            background-size: 24px 24px;
+                            font-family: ${bodyFont};
+                        `;
+                        ach1Div.textContent = note.ach1 || '';
+
+                        const ach2Div = document.createElement('div');
+                        ach2Div.className = 'column column-ach2';
+                        ach2Div.style.cssText = `
+                            width: 44%;
+                            padding: 0 12px;
+                            padding-top: 22px;
+                            padding-bottom: 20px;
+                            font-size: 18px;
+                            line-height: 24px;
+                            color: ${textColor};
+                            white-space: pre-wrap;
+                            word-break: break-word;
+                            background-image: radial-gradient(${dotColor} 1px, transparent 1px);
+                            background-size: 24px 24px;
+                            font-family: ${bodyFont};
+                        `;
+                        ach2Div.textContent = note.ach2 || '';
+
+                        contentArea.appendChild(moodDiv);
+                        contentArea.appendChild(ach1Div);
+                        contentArea.appendChild(ach2Div);
+
+                        const footer = document.createElement('div');
+                        footer.className = 'footer-brand';
+                        footer.style.cssText = `
+                            position: absolute;
+                            bottom: 10px;
+                            right: 10px;
+                            font-size: 12px;
+                            color: ${subTextColor};
+                            font-weight: 500;
+                            font-family: ${bodyFont};
+                        `;
+                        footer.textContent = 'KOKUYO';
+
+                        const dateLabel = document.createElement('div');
+                        dateLabel.style.cssText = `
+                            position: absolute;
+                            top: 10px;
+                            right: 15px;
+                            font-size: 14px;
+                            color: ${subTextColor};
+                            opacity: 0.7;
+                            font-family: ${bodyFont};
+                        `;
+                        dateLabel.textContent = dateStr;
+
+                        card.appendChild(headerRow);
+                        card.appendChild(contentArea);
+                        card.appendChild(footer);
+                        card.appendChild(dateLabel);
+
+                        container.appendChild(card);
+                    });
+
+                    document.body.appendChild(container);
+
+                    const cards = container.querySelectorAll('.notebook');
+                    const { jsPDF } = window.jspdf;
+                    let pdf = null;
+                    let isFirstCard = true;
+
+                    for (const card of cards) {
+                        const canvas = await html2canvas(card, {
+                            scale: 2.5,
+                            backgroundColor: styles.getPropertyValue('--card-bg').trim(),
+                            logging: false
+                        });
+
+                        const imgData = canvas.toDataURL('image/png');
+                        // 图片高度直接换算为 PDF 高度
+                        const imgHeightMm = (canvas.height * PAGE_WIDTH_MM) / canvas.width;
+                        // 页面高度等于图片高度，不再额外加空白（底部留白已在截图内部）
+                        const pageHeightMm = imgHeightMm;
+
+                        if (isFirstCard) {
+                            pdf = new jsPDF({
+                                orientation: 'landscape',
+                                unit: 'mm',
+                                format: [PAGE_WIDTH_MM, pageHeightMm]
+                            });
+                            isFirstCard = false;
+                        } else {
+                            pdf.addPage([PAGE_WIDTH_MM, pageHeightMm]);
+                        }
+
+                        // 图片占满整页，不留线外空白
+                        pdf.addImage(imgData, 'PNG', 0, 0, PAGE_WIDTH_MM, pageHeightMm);
+                    }
+
+                    document.body.removeChild(container);
+                    pdf.save(`全部成就笔记_合集.pdf`);
+
+                } catch (error) {
+                    console.error(error);
+                    alert('批量导出失败，请重试。');
+                } finally {
+                    exportAllBtn.textContent = originalText;
+                    exportAllBtn.disabled = false;
+                }
+            }
+
+            document.getElementById('exportPdfBtn').addEventListener('click', exportSinglePdf);
+            document.getElementById('exportAllBtn').addEventListener('click', exportAllNote);
+
+            // 初始化
+            updateDateDisplay();
+            setTimeout(adjustAllTextareasHeight, 20);
+        })();
+    </script>
+</body>
+</html>
